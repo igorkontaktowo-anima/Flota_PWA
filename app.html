@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#000080">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Flota">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Flota PWA</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:none;text-size-adjust:none}
+:root{
+  --c-bg:#f4f4f9;--c-surface:#fff;--c-border:#d4d1ca;--c-text:#1a1a2e;
+  --c-muted:#6b6b7b;--c-primary:#000080;--c-primary-light:#e8e8f5;
+  --c-success:#1a7a2e;--c-success-bg:#e8f5ec;--c-error:#a0182b;--c-error-bg:#fde8ea;
+  --c-warn:#8a5b00;--c-warn-bg:#fff3cd;
+  --r:0.75rem;--shadow:0 2px 8px rgba(0,0,0,.08);
+  --tab-h:56px;--header-h:56px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+     font-size:16px;background:var(--c-bg);color:var(--c-text);
+     min-height:100dvh;display:flex;flex-direction:column}
+.header{position:sticky;top:0;z-index:50;background:var(--c-primary);
+  color:#fff;height:var(--header-h);display:flex;align-items:center;
+  padding:0 1rem;gap:.75rem;box-shadow:var(--shadow)}
+.header-logo{font-weight:700;font-size:1.1rem;letter-spacing:.5px;flex:1}
+.header-driver{font-size:.8rem;opacity:.8;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:120px}
+.header-offline{font-size:.75rem;background:#ff6b35;border-radius:999px;
+  padding:2px 8px;display:none}
+.header-offline.show{display:inline}
+#msg-box{display:none;background:var(--c-warn-bg);border-bottom:2px solid var(--c-warn);
+  padding:.75rem 1rem;font-size:.88rem;color:var(--c-warn)}
+.msg-item{padding:.25rem 0;border-bottom:1px solid rgba(0,0,0,.08)}
+.msg-item:last-child{border-bottom:none}
+.msg-date{font-size:.75rem;opacity:.7;margin-right:.5rem}
+.tabs{display:flex;background:var(--c-surface);border-bottom:2px solid var(--c-border);
+  position:sticky;top:var(--header-h);z-index:40}
+.tab-btn{flex:1;height:var(--tab-h);border:none;background:none;
+  font-size:.78rem;font-weight:600;color:var(--c-muted);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:color .18s,border-bottom .18s;border-bottom:3px solid transparent;
+  margin-bottom:-2px;letter-spacing:.3px;padding:0}
+.tab-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.tab-btn.active{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.tab-btn:active{background:var(--c-primary-light)}
+.panels{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.panel{display:none;padding:1rem}
+.panel.active{display:block}
+.card{background:var(--c-surface);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:.82rem;font-weight:700;color:var(--c-muted);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:1rem}
+.field-label{font-size:.82rem;font-weight:600;color:var(--c-muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;display:block}
+select{width:100%;padding:.75rem 1rem;border:1.5px solid var(--c-border);
+  border-radius:var(--r);font-size:1rem;background:var(--c-surface);color:var(--c-text);
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b7b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+select:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-light)}
+textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--c-border);
+  border-radius:var(--r);font-size:1rem;min-height:120px;resize:vertical;
+  font-family:inherit;color:var(--c-text);background:var(--c-surface)}
+textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-light)}
+.search-wrap{position:relative;margin-bottom:.5rem}
+.search-wrap input{width:100%;padding:.75rem 1rem .75rem 2.5rem;
+  border:1.5px solid var(--c-border);border-radius:var(--r);font-size:1rem;
+  background:var(--c-surface);color:var(--c-text)}
+.search-wrap input:focus{outline:none;border-color:var(--c-primary);
+  box-shadow:0 0 0 3px var(--c-primary-light)}
+.search-icon{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);
+  color:var(--c-muted);pointer-events:none}
+.search-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.clinic-list{max-height:220px;overflow-y:auto;border:1.5px solid var(--c-border);
+  border-radius:var(--r);background:var(--c-surface)}
+.clinic-item{padding:.75rem 1rem;cursor:pointer;font-size:.95rem;
+  border-bottom:1px solid var(--c-border);transition:background .15s}
+.clinic-item:last-child{border-bottom:none}
+.clinic-item:active,.clinic-item.selected{background:var(--c-primary-light);
+  color:var(--c-primary);font-weight:600}
+.clinic-selected-badge{display:none;background:var(--c-primary-light);
+  color:var(--c-primary);border-radius:var(--r);padding:.5rem .75rem;
+  font-size:.9rem;font-weight:600;margin-top:.5rem;align-items:center;gap:.5rem}
+.clinic-selected-badge.show{display:flex}
+.badge-clear{margin-left:auto;cursor:pointer;font-size:1.2rem;
+  line-height:1;color:var(--c-muted)}
+.upload-area{border:2px dashed var(--c-border);border-radius:var(--r);
+  padding:2rem 1rem;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;position:relative}
+.upload-area:active,.upload-area.drag{border-color:var(--c-primary);
+  background:var(--c-primary-light)}
+.upload-area.has-files{border-color:#1a7a2e;background:var(--c-success-bg)}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{width:40px;height:40px;margin:0 auto .75rem;stroke:var(--c-muted);
+  fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.upload-text{font-size:.95rem;color:var(--c-muted)}
+.upload-area.has-files .upload-text{color:var(--c-success);font-weight:600}
+.upload-count{font-size:.82rem;color:var(--c-muted);margin-top:.25rem}
+.progress-wrap{margin-top:.75rem;display:none}
+.progress-wrap.show{display:block}
+.progress-bar-outer{height:8px;background:var(--c-border);border-radius:999px;
+  overflow:hidden;margin-bottom:.5rem}
+.progress-bar-inner{height:100%;background:var(--c-primary);border-radius:999px;
+  transition:width .3s ease;width:0%}
+.progress-label{font-size:.82rem;color:var(--c-muted);text-align:center}
+.btn{width:100%;padding:1rem;border:none;border-radius:var(--r);
+  font-size:1rem;font-weight:700;cursor:pointer;
+  transition:background .18s,transform .1s;letter-spacing:.3px;margin-top:.5rem;
+  min-height:54px;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--c-primary);color:#fff}
+.btn-primary:hover{background:#00006a}
+.btn-primary:disabled{background:#9999cc;cursor:not-allowed;transform:none}
+.alert{border-radius:var(--r);padding:.875rem 1rem;font-size:.9rem;font-weight:500;
+  display:none;margin-top:.75rem;align-items:flex-start;gap:.5rem}
+.alert.show{display:flex}
+.alert-success{background:var(--c-success-bg);color:var(--c-success)}
+.alert-error{background:var(--c-error-bg);color:var(--c-error)}
+.alert-icon{flex-shrink:0;font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">🚗 Flota PWA</div>
+  <div class="header-driver" id="driver-name">…</div>
+  <div class="header-offline" id="offline-badge">OFFLINE</div>
+</header>
+
+<div id="msg-box"></div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" data-tab="photos" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+    ZDJĘCIA
+  </button>
+  <button class="tab-btn" data-tab="notes" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/></svg>
+    NOTATKA
+  </button>
+  <button class="tab-btn" data-tab="resources" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    PRZEKAZANIE
+  </button>
+</nav>
+
+<main class="panels">
+
+  <!-- ZDJĘCIA -->
+  <section class="panel active" id="panel-photos">
+    <div class="card">
+      <div class="card-title">Pojazd</div>
+      <select id="vehicle-photos"><option value="">— wybierz pojazd —</option></select>
+    </div>
+    <div class="card">
+      <div class="card-title">Zdjęcia (maks. 20)</div>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="file-input" accept="image/*" multiple capture="environment">
+        <svg class="upload-icon" viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <div class="upload-text" id="upload-text">Dotknij aby dodać zdjęcia</div>
+        <div class="upload-count" id="upload-count"></div>
+      </div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progress-bar"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Przygotowuję…</div>
+      </div>
+      <div class="alert alert-success" id="photos-ok">
+        <span class="alert-icon">✅</span>
+        <span id="photos-ok-msg"></span>
+      </div>
+      <div class="alert alert-error" id="photos-err">
+        <span class="alert-icon">⚠️</span>
+        <span id="photos-err-msg"></span>
+      </div>
+      <button class="btn btn-primary" id="btn-send-photos" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Wyślij zdjęcia
+      </button>
+    </div>
+  </section>
+
+  <!-- NOTATKA -->
+  <section class="panel" id="panel-notes">
+    <div class="card">
+      <div class="card-title">Pojazd</div>
+      <select id="vehicle-notes"><option value="">— wybierz pojazd —</option></select>
+    </div>
+    <div class="card">
+      <div class="card-title">Notatka serwisowa</div>
+      <label class="field-label" for="note-text">Opis usterki / uwagi</label>
+      <textarea id="note-text"
+        placeholder="Opisz usterkę lub uwagi dotyczące pojazdu…"></textarea>
+      <div class="alert alert-success" id="note-ok">
+        <span class="alert-icon">✅</span> Notatka zapisana
+      </div>
+      <div class="alert alert-error" id="note-err">
+        <span class="alert-icon">⚠️</span>
+        <span id="note-err-msg"></span>
+      </div>
+      <button class="btn btn-primary" id="btn-send-note">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Zapisz notatkę
+      </button>
+    </div>
+  </section>
+
+  <!-- PRZEKAZANIE -->
+  <section class="panel" id="panel-resources">
+    <div class="card">
+      <div class="card-title">Pojazd</div>
+      <select id="vehicle-resources"><option value="">— wybierz pojazd —</option></select>
+    </div>
+    <div class="card">
+      <div class="card-title">Lecznica</div>
+      <div class="search-wrap">
+        <span class="search-icon">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="clinic-search"
+          placeholder="Wpisz nazwę lecznicy…" autocomplete="off">
+      </div>
+      <div class="clinic-list" id="clinic-list"></div>
+      <div class="clinic-selected-badge" id="clinic-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span id="clinic-badge-text"></span>
+        <span class="badge-clear" id="clinic-badge-clear">✕</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Przekazane zasoby</div>
+      <label class="field-label" for="resource-items">Co przekazano</label>
+      <textarea id="resource-items"
+        placeholder="np. Odczynniki PCR x2, kontrola pozytywna x1…"
+        style="min-height:90px"></textarea>
+      <label class="field-label" style="margin-top:.75rem" for="resource-note">
+        Uwagi (opcjonalnie)
+      </label>
+      <textarea id="resource-note"
+        placeholder="Dodatkowe uwagi…" style="min-height:70px"></textarea>
+      <div class="alert alert-success" id="res-ok">
+        <span class="alert-icon">✅</span> Przekazanie zapisane
+      </div>
+      <div class="alert alert-error" id="res-err">
+        <span class="alert-icon">⚠️</span>
+        <span id="res-err-msg"></span>
+      </div>
+      <button class="btn btn-primary" id="btn-send-res">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+        Zapisz przekazanie
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+import { resolveSession, dbPut, dbGet, gasPost } from './js/auth.js';
+import { queuePhotos }  from './js/photos.js';
+import { saveNote }     from './js/notes.js';
+import { saveResource } from './js/resources.js';
+import { initPush, startPolling } from './js/push.js';
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' })
+    .catch(e => console.warn('[SW]', e));
+}
+
+const offlineBadge = document.getElementById('offline-badge');
+window.addEventListener('offline', () => offlineBadge.classList.add('show'));
+window.addEventListener('online',  () => offlineBadge.classList.remove('show'));
+if (!navigator.onLine) offlineBadge.classList.add('show');
+
+let session   = null;
+let vehicles  = [];
+let clinics   = [];
+let selClinic = null;
+let selFiles  = [];
+
+// ── Boot ──────────────────────────────────────────────────────────
+(async () => {
+  session = await resolveSession();
+  if (!session) { location.href = './index.html'; return; }
+
+  const name = session.token.split('-')[0];
+  document.getElementById('driver-name').textContent =
+    name.charAt(0).toUpperCase() + name.slice(1);
+
+  await loadConfig();
+  initPush(session.token);
+  startPolling(session.token);
+})();
+
+// ── Config ────────────────────────────────────────────────────────
+async function loadConfig() {
+  try {
+    const data = await gasPost({ action: 'getConfig' });
+    if (data.status === 'ok') {
+      vehicles = data.vehicles;
+      clinics  = data.clinics;
+      await dbPut('session', { key: 'config', vehicles, clinics, ts: Date.now() });
+    }
+  } catch (_) {
+    const cached = await dbGet('session', 'config');
+    if (cached) { vehicles = cached.vehicles; clinics = cached.clinics; }
+  }
+  renderVehicleSelects();
+  renderClinicList('');
+}
+
+function renderVehicleSelects() {
+  ['vehicle-photos','vehicle-notes','vehicle-resources'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— wybierz pojazd —</option>';
+    vehicles.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v; sel.appendChild(o);
+    });
+  });
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active'); b.setAttribute('aria-selected','false');
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Clinic search ─────────────────────────────────────────────────
+document.getElementById('clinic-search').addEventListener('input', e => {
+  renderClinicList(e.target.value.trim().toLowerCase());
+});
+
+function renderClinicList(q) {
+  const list = document.getElementById('clinic-list');
+  if (q.length < 2) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
+      'Wpisz co najmniej 2 litery…</div>';
+    return;
+  }
+  const filtered = clinics.filter(c => c.name.toLowerCase().includes(q));
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
+      'Brak wyników</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(c =>
+    `<div class="clinic-item${selClinic && selClinic.id===c.id?' selected':''}"
+      data-id="${c.id}" data-name="${c.name.replace(/"/g,'&quot;')}">${c.name}</div>`
+  ).join('');
+  list.querySelectorAll('.clinic-item').forEach(el => {
+    el.addEventListener('click', () => {
+      selClinic = { id: el.dataset.id, name: el.dataset.name };
+      document.getElementById('clinic-search').value = '';
+      renderClinicList('');
+      document.getElementById('clinic-badge-text').textContent = selClinic.name;
+      document.getElementById('clinic-badge').classList.add('show');
+    });
+  });
+}
+
+document.getElementById('clinic-badge-clear').addEventListener('click', () => {
+  selClinic = null;
+  document.getElementById('clinic-badge').classList.remove('show');
+});
+
+// ── File input ────────────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change', function() {
+  selFiles = Array.from(this.files);
+  const area = document.getElementById('upload-area');
+  const txt  = document.getElementById('upload-text');
+  const cnt  = document.getElementById('upload-count');
+  if (selFiles.length) {
+    area.classList.add('has-files');
+    txt.textContent = `Wybrano ${selFiles.length} zdjęcie/zdjęcia`;
+    cnt.textContent = `(maks. 20 — wybrano ${selFiles.length})`;
+  } else {
+    area.classList.remove('has-files');
+    txt.textContent = 'Dotknij aby dodać zdjęcia';
+    cnt.textContent = '';
+  }
+  document.getElementById('btn-send-photos').disabled = !selFiles.length;
+  hideAlert('photos');
+});
+
+// ── Send photos ───────────────────────────────────────────────────
+document.getElementById('btn-send-photos').addEventListener('click', async () => {
+  const vehicle = document.getElementById('vehicle-photos').value;
+  if (!vehicle) { showAlert('photos','error','Wybierz pojazd'); return; }
+  if (!selFiles.length) { showAlert('photos','error','Wybierz zdjęcia'); return; }
+  const btn = document.getElementById('btn-send-photos');
+  btn.disabled = true;
+  showProgress(0,'Przygotowuję…');
+  hideAlert('photos');
+  try {
+    await queuePhotos({
+      token: session.token, vehicle, files: selFiles,
+      onProgress: (msg, pct) => showProgress(pct, msg)
+    });
+    selFiles = [];
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-area').classList.remove('has-files');
+    document.getElementById('upload-text').textContent = 'Dotknij aby dodać zdjęcia';
+    document.getElementById('upload-count').textContent = '';
+    hideProgress();
+    document.getElementById('photos-ok-msg').textContent =
+      `Zdjęcia pojazdu ${vehicle} zostały zapisane ✅`;
+    showAlert('photos','success');
+  } catch (err) {
+    hideProgress();
+    showAlert('photos','error', err.message || 'Błąd wysyłania');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ── Send note ─────────────────────────────────────────────────────
+document.getElementById('btn-send-note').addEventListener('click', async () => {
+  const vehicle = document.getElementById('vehicle-notes').value;
+  const note    = document.getElementById('note-text').value;
+  const btn     = document.getElementById('btn-send-note');
+  hideAlert('note');
+  btn.disabled = true; btn.textContent = 'Zapisuję…';
+  try {
+    await saveNote({ token: session.token, vehicle, note });
+    document.getElementById('note-text').value = '';
+    showAlert('note','success');
+  } catch (err) {
+    document.getElementById('note-err-msg').textContent = err.message;
+    showAlert('note','error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/></svg> Zapisz notatkę`;
+  }
+});
+
+// ── Send resource ─────────────────────────────────────────────────
+document.getElementById('btn-send-res').addEventListener('click', async () => {
+  const vehicle = document.getElementById('vehicle-resources').value;
+  const items   = document.getElementById('resource-items').value;
+  const note    = document.getElementById('resource-note').value;
+  const btn     = document.getElementById('btn-send-res');
+  hideAlert('res');
+  btn.disabled = true; btn.textContent = 'Zapisuję…';
+  try {
+    await saveResource({ token: session.token, vehicle, clinic: selClinic, items, note });
+    document.getElementById('resource-items').value = '';
+    document.getElementById('resource-note').value  = '';
+    selClinic = null;
+    document.getElementById('clinic-badge').classList.remove('show');
+    showAlert('res','success');
+  } catch (err) {
+    document.getElementById('res-err-msg').textContent = err.message;
+    showAlert('res','error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Zapisz przekazanie`;
+  }
+});
+
+// ── Helpers ───────────────────────────────────────────────────────
+function showAlert(prefix, type, msg) {
+  const el = document.getElementById(prefix + '-' + (type === 'success' ? 'ok' : 'err'));
+  if (msg && type === 'error') {
+    const m = document.getElementById(prefix + '-err-msg');
+    if (m) m.textContent = msg;
+  }
+  el.classList.add('show');
+  if (type === 'success') setTimeout(() => el.classList.remove('show'), 4000);
+}
+function hideAlert(prefix) {
+  ['ok','err'].forEach(s => {
+    const el = document.getElementById(prefix + '-' + s);
+    if (el) el.classList.remove('show');
+  });
+}
+function showProgress(pct, label) {
+  document.getElementById('progress-wrap').classList.add('show');
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+function hideProgress() {
+  document.getElementById('progress-wrap').classList.remove('show');
+}
+</script>
+</body>
+</html>
