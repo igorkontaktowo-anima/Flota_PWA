@@ -70,13 +70,24 @@ export async function resolveSession() {
   return null;
 }
 
-// ── POST do GAS ──────────────────────────────────────────────────
+// POST do GAS
 export async function gasPost(payload) {
   const res = await fetch(GAS_URL, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },  // ← zmiana: text/plain omija CORS preflight
     body:    JSON.stringify(payload)
   });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (data.status === 'error') throw new Error(data.message);
+  return data;
+}
+
+// GET do GAS (tylko getConfig)
+export async function gasGet(params) {
+  const url = new URL(GAS_URL);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString());
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
   if (data.status === 'error') throw new Error(data.message);

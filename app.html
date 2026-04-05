@@ -286,7 +286,7 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 </main>
 
 <script type="module">
-import { resolveSession, dbPut, dbGet, gasPost } from './js/auth.js';
+import { resolveSession, dbPut, dbGet, gasPost, gasGet } from './js/auth.js';
 import { queuePhotos }  from './js/photos.js';
 import { saveNote }     from './js/notes.js';
 import { saveResource } from './js/resources.js';
@@ -325,7 +325,7 @@ let selFiles  = [];
 // ── Config ────────────────────────────────────────────────────────
 async function loadConfig() {
   try {
-    const data = await gasPost({ action: 'getConfig' });
+    const data = await gasGet({ action: 'getConfig' });
     if (data.status === 'ok') {
       vehicles = data.vehicles;
       clinics  = data.clinics;
