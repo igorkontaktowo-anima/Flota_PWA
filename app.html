@@ -323,33 +323,57 @@ let selFiles  = [];
 })();
 
 // ── Config ────────────────────────────────────────────────────────
+function renderVehicleSelects() {
+  ['vehicle-photos','vehicle-notes','vehicle-resources'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— wybierz pojazd —</option>';
+    vehicles.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v; sel.appendChild(o);
+    });
+  });
+}
+
+function renderClinicList(q) {
+  const list = document.getElementById('clinic-list');
+  if (!q || q.length < 2) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
+      'Wpisz co najmniej 2 litery…</div>';
+    return;
+  }
+  const filtered = clinics.filter(c => c.name.toLowerCase().includes(q));
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
+      'Brak wyników</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(c =>
+    `<div class="clinic-item${selClinic && selClinic.id===c.id?' selected':''}"
+      data-id="${c.id}" data-name="${c.name.replace(/"/g,'&quot;')}">${c.name}</div>`
+  ).join('');
+  list.querySelectorAll('.clinic-item').forEach(el => {
+    el.addEventListener('click', () => {
+      selClinic = { id: el.dataset.id, name: el.dataset.name };
+      document.getElementById('clinic-search').value = '';
+      renderClinicList('');
+      document.getElementById('clinic-badge-text').textContent = selClinic.name;
+      document.getElementById('clinic-badge').classList.add('show');
+    });
+  });
+}
+
 async function loadConfig() {
   try {
     const data = await gasGet({ action: 'getConfig' });
     console.log('[Config] odpowiedź GAS:', JSON.stringify(data));
-
-    // Obsłuż różne formaty odpowiedzi
-    vehicles = Array.isArray(data.vehicles) ? data.vehicles
-             : Array.isArray(data.data?.vehicles) ? data.data.vehicles
-             : [];
-
-    clinics  = Array.isArray(data.clinics)  ? data.clinics
-             : Array.isArray(data.data?.clinics)  ? data.data.clinics
-             : [];
-
-    if (vehicles.length === 0 && clinics.length === 0) {
-      console.warn('[Config] Brak danych — sprawdź GAS');
-    }
-
+    vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
+    clinics  = Array.isArray(data.clinics)  ? data.clinics  : [];
+    if (vehicles.length === 0) console.warn('[Config] Brak pojazdów z GAS');
     await dbPut('session', { key: 'config', vehicles, clinics, ts: Date.now() });
-
   } catch (err) {
     console.error('[Config] błąd:', err.message);
     const cached = await dbGet('session', 'config');
-    if (cached) {
-      vehicles = cached.vehicles || [];
-      clinics  = cached.clinics  || [];
-    }
+    if (cached) { vehicles = cached.vehicles || []; clinics = cached.clinics || []; }
   }
   renderVehicleSelects();
   renderClinicList('');
