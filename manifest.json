@@ -1,13 +1,13 @@
 {
   "name": "Flota PWA",
   "short_name": "Flota",
-  "description": "Aplikacja dla kurierów — zdjęcia, notatki, przekazanie zasobów",
+  "description": "Aplikacja dla kurierow - zdjecia, notatki, zasoby",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#000080",
+  "background_color": "#f4f4f9",
   "theme_color": "#000080",
-  "lang": "pl",
   "icons": [
     {
       "src": "./icons/icon-192.png",
