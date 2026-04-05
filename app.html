@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="pl" data-theme="light">
+<html lang="pl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#000080">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Flota">
+  <meta name="theme-color" content="#000080">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Flota PWA</title>
@@ -89,13 +90,11 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
   color:var(--c-primary);border-radius:var(--r);padding:.5rem .75rem;
   font-size:.9rem;font-weight:600;margin-top:.5rem;align-items:center;gap:.5rem}
 .clinic-selected-badge.show{display:flex}
-.badge-clear{margin-left:auto;cursor:pointer;font-size:1.2rem;
-  line-height:1;color:var(--c-muted)}
+.badge-clear{margin-left:auto;cursor:pointer;font-size:1.2rem;line-height:1;color:var(--c-muted)}
 .upload-area{border:2px dashed var(--c-border);border-radius:var(--r);
   padding:2rem 1rem;text-align:center;cursor:pointer;
   transition:border-color .2s,background .2s;position:relative}
-.upload-area:active,.upload-area.drag{border-color:var(--c-primary);
-  background:var(--c-primary-light)}
+.upload-area:active,.upload-area.drag{border-color:var(--c-primary);background:var(--c-primary-light)}
 .upload-area.has-files{border-color:#1a7a2e;background:var(--c-success-bg)}
 .upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
 .upload-icon{width:40px;height:40px;margin:0 auto .75rem;stroke:var(--c-muted);
@@ -105,10 +104,8 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 .upload-count{font-size:.82rem;color:var(--c-muted);margin-top:.25rem}
 .progress-wrap{margin-top:.75rem;display:none}
 .progress-wrap.show{display:block}
-.progress-bar-outer{height:8px;background:var(--c-border);border-radius:999px;
-  overflow:hidden;margin-bottom:.5rem}
-.progress-bar-inner{height:100%;background:var(--c-primary);border-radius:999px;
-  transition:width .3s ease;width:0%}
+.progress-bar-outer{height:8px;background:var(--c-border);border-radius:999px;overflow:hidden;margin-bottom:.5rem}
+.progress-bar-inner{height:100%;background:var(--c-primary);border-radius:999px;transition:width .3s ease;width:0%}
 .progress-label{font-size:.82rem;color:var(--c-muted);text-align:center}
 .btn{width:100%;padding:1rem;border:none;border-radius:var(--r);
   font-size:1rem;font-weight:700;cursor:pointer;
@@ -129,8 +126,8 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 <body>
 
 <header class="header">
-  <div class="header-logo">🚗 Flota PWA</div>
-  <div class="header-driver" id="driver-name">…</div>
+  <div class="header-logo">&#x1F697; Flota PWA</div>
+  <div class="header-driver" id="driver-name">&#x2026;</div>
   <div class="header-offline" id="offline-badge">OFFLINE</div>
 </header>
 
@@ -140,7 +137,7 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
   <button class="tab-btn active" data-tab="photos" role="tab" aria-selected="true">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/>
     <circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-    ZDJĘCIA
+    ZDJECIA
   </button>
   <button class="tab-btn" data-tab="notes" role="tab" aria-selected="false">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -155,50 +152,41 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 </nav>
 
 <main class="panels">
-
-  <!-- ZDJĘCIA -->
   <section class="panel active" id="panel-photos">
     <div class="card">
       <div class="card-title">Pojazd</div>
       <select id="vehicle-photos"><option value="">— wybierz pojazd —</option></select>
     </div>
     <div class="card">
-      <div class="card-title">Zdjęcia (maks. 20)</div>
+      <div class="card-title">Zdjecia (maks. 20)</div>
       <div class="upload-area" id="upload-area">
         <input type="file" id="file-input" accept="image/*" multiple capture="environment">
         <svg class="upload-icon" viewBox="0 0 24 24">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
-        <div class="upload-text" id="upload-text">Dotknij aby dodać zdjęcia</div>
+        <div class="upload-text" id="upload-text">Dotknij aby dodac zdjecia</div>
         <div class="upload-count" id="upload-count"></div>
       </div>
       <div class="progress-wrap" id="progress-wrap">
-        <div class="progress-bar-outer">
-          <div class="progress-bar-inner" id="progress-bar"></div>
-        </div>
-        <div class="progress-label" id="progress-label">Przygotowuję…</div>
+        <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar"></div></div>
+        <div class="progress-label" id="progress-label">Przygotowuje...</div>
       </div>
       <div class="alert alert-success" id="photos-ok">
-        <span class="alert-icon">✅</span>
-        <span id="photos-ok-msg"></span>
+        <span class="alert-icon">&#x2705;</span><span id="photos-ok-msg"></span>
       </div>
       <div class="alert alert-error" id="photos-err">
-        <span class="alert-icon">⚠️</span>
-        <span id="photos-err-msg"></span>
+        <span class="alert-icon">&#x26A0;&#xFE0F;</span><span id="photos-err-msg"></span>
       </div>
       <button class="btn btn-primary" id="btn-send-photos" disabled>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
         </svg>
-        Wyślij zdjęcia
+        Wyslij zdjecia
       </button>
     </div>
   </section>
 
-  <!-- NOTATKA -->
   <section class="panel" id="panel-notes">
     <div class="card">
       <div class="card-title">Pojazd</div>
@@ -207,28 +195,19 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
     <div class="card">
       <div class="card-title">Notatka serwisowa</div>
       <label class="field-label" for="note-text">Opis usterki / uwagi</label>
-      <textarea id="note-text"
-        placeholder="Opisz usterkę lub uwagi dotyczące pojazdu…"></textarea>
-      <div class="alert alert-success" id="note-ok">
-        <span class="alert-icon">✅</span> Notatka zapisana
-      </div>
-      <div class="alert alert-error" id="note-err">
-        <span class="alert-icon">⚠️</span>
-        <span id="note-err-msg"></span>
-      </div>
+      <textarea id="note-text" placeholder="Opisz usterke lub uwagi dotyczace pojazdu..."></textarea>
+      <div class="alert alert-success" id="note-ok"><span class="alert-icon">&#x2705;</span> Notatka zapisana</div>
+      <div class="alert alert-error" id="note-err"><span class="alert-icon">&#x26A0;&#xFE0F;</span><span id="note-err-msg"></span></div>
       <button class="btn btn-primary" id="btn-send-note">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
+          <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
         </svg>
-        Zapisz notatkę
+        Zapisz notatke
       </button>
     </div>
   </section>
 
-  <!-- PRZEKAZANIE -->
   <section class="panel" id="panel-resources">
     <div class="card">
       <div class="card-title">Pojazd</div>
@@ -237,184 +216,175 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
     <div class="card">
       <div class="card-title">Lecznica</div>
       <div class="search-wrap">
-        <span class="search-icon">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </span>
-        <input type="text" id="clinic-search"
-          placeholder="Wpisz nazwę lecznicy…" autocomplete="off">
+        <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" id="clinic-search" placeholder="Wpisz nazwe lecznicy..." autocomplete="off">
       </div>
-      <div class="clinic-list" id="clinic-list"></div>
+      <div class="clinic-list" id="clinic-list">
+        <div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Wpisz co najmniej 2 litery...</div>
+      </div>
       <div class="clinic-selected-badge" id="clinic-badge">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2.5">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <span id="clinic-badge-text"></span>
-        <span class="badge-clear" id="clinic-badge-clear">✕</span>
+        <span class="badge-clear" id="clinic-badge-clear">&#x2715;</span>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Przekazane zasoby</div>
       <label class="field-label" for="resource-items">Co przekazano</label>
-      <textarea id="resource-items"
-        placeholder="np. Odczynniki PCR x2, kontrola pozytywna x1…"
-        style="min-height:90px"></textarea>
-      <label class="field-label" style="margin-top:.75rem" for="resource-note">
-        Uwagi (opcjonalnie)
-      </label>
-      <textarea id="resource-note"
-        placeholder="Dodatkowe uwagi…" style="min-height:70px"></textarea>
-      <div class="alert alert-success" id="res-ok">
-        <span class="alert-icon">✅</span> Przekazanie zapisane
-      </div>
-      <div class="alert alert-error" id="res-err">
-        <span class="alert-icon">⚠️</span>
-        <span id="res-err-msg"></span>
-      </div>
+      <textarea id="resource-items" placeholder="np. Odczynniki PCR x2..." style="min-height:90px"></textarea>
+      <label class="field-label" style="margin-top:.75rem" for="resource-note">Uwagi (opcjonalnie)</label>
+      <textarea id="resource-note" placeholder="Dodatkowe uwagi..." style="min-height:70px"></textarea>
+      <div class="alert alert-success" id="res-ok"><span class="alert-icon">&#x2705;</span> Przekazanie zapisane</div>
+      <div class="alert alert-error" id="res-err"><span class="alert-icon">&#x26A0;&#xFE0F;</span><span id="res-err-msg"></span></div>
       <button class="btn btn-primary" id="btn-send-res">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
         </svg>
         Zapisz przekazanie
       </button>
     </div>
   </section>
-
 </main>
 
-<script type="module">
-import { resolveSession, dbPut, dbGet, gasPost, gasGet } from './js/auth.js';
-import { queuePhotos }  from './js/photos.js';
-import { saveNote }     from './js/notes.js';
-import { saveResource } from './js/resources.js';
-import { initPush, startPolling } from './js/push.js';
+<script>
+// ================================================================
+//  app.html — inline script (bez ES6 modules — pewniejszy na GitHub Pages)
+// ================================================================
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' })
-    .catch(e => console.warn('[SW]', e));
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz3A9LWbqrjO7KlYMoHNivf6Hbpe4zLVjWfWu8Iizcl_gmlILqt6-cESOTpK09gwSLl/exec';
+const DB_NAME = 'flota_pwa';
+
+// ── Stan aplikacji ────────────────────────────────────────────────
+var session   = null;
+var vehicles  = [];
+var clinics   = [];
+var selClinic = null;
+var selFiles  = [];
+
+// ── IndexedDB ─────────────────────────────────────────────────────
+function openDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains('session'))
+        db.createObjectStore('session', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains('photo_queue'))
+        db.createObjectStore('photo_queue', { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror   = function(e) { reject(e.target.error); };
+  });
 }
 
-const offlineBadge = document.getElementById('offline-badge');
-window.addEventListener('offline', () => offlineBadge.classList.add('show'));
-window.addEventListener('online',  () => offlineBadge.classList.remove('show'));
-if (!navigator.onLine) offlineBadge.classList.add('show');
-
-let session   = null;
-let vehicles  = [];
-let clinics   = [];
-let selClinic = null;
-let selFiles  = [];
-
-// ── Boot ──────────────────────────────────────────────────────────
-(async () => {
-  session = await resolveSession();
-  if (!session) { location.href = './index.html'; return; }
-
-  const name = session.token.split('-')[0];
-  document.getElementById('driver-name').textContent =
-    name.charAt(0).toUpperCase() + name.slice(1);
-
-  await loadConfig();
-  initPush(session.token);
-  startPolling(session.token);
-})();
-
-// ── Config ────────────────────────────────────────────────────────
-function renderVehicleSelects() {
-  ['vehicle-photos','vehicle-notes','vehicle-resources'].forEach(id => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">— wybierz pojazd —</option>';
-    vehicles.forEach(v => {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = v; sel.appendChild(o);
+function dbPut(storeName, value) {
+  return openDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx  = db.transaction(storeName, 'readwrite');
+      var req = tx.objectStore(storeName).put(value);
+      req.onsuccess = function() { resolve(); };
+      req.onerror   = function() { reject(req.error); };
     });
   });
 }
 
-function renderClinicList(q) {
-  const list = document.getElementById('clinic-list');
-  if (!q || q.length < 2) {
-    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
-      'Wpisz co najmniej 2 litery…</div>';
-    return;
-  }
-  const filtered = clinics.filter(c => c.name.toLowerCase().includes(q));
-  if (!filtered.length) {
-    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
-      'Brak wyników</div>';
-    return;
-  }
-  list.innerHTML = filtered.map(c =>
-    `<div class="clinic-item${selClinic && selClinic.id===c.id?' selected':''}"
-      data-id="${c.id}" data-name="${c.name.replace(/"/g,'&quot;')}">${c.name}</div>`
-  ).join('');
-  list.querySelectorAll('.clinic-item').forEach(el => {
-    el.addEventListener('click', () => {
-      selClinic = { id: el.dataset.id, name: el.dataset.name };
-      document.getElementById('clinic-search').value = '';
-      renderClinicList('');
-      document.getElementById('clinic-badge-text').textContent = selClinic.name;
-      document.getElementById('clinic-badge').classList.add('show');
+function dbGet(storeName, key) {
+  return openDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx  = db.transaction(storeName, 'readonly');
+      var req = tx.objectStore(storeName).get(key);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror   = function() { reject(req.error); };
     });
   });
 }
 
-async function loadConfig() {
-  try {
-    const data = await gasGet({ action: 'getConfig' });
-    console.log('[Config] odpowiedź GAS:', JSON.stringify(data));
-    vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
-    clinics  = Array.isArray(data.clinics)  ? data.clinics  : [];
-    if (vehicles.length === 0) console.warn('[Config] Brak pojazdów z GAS');
-    await dbPut('session', { key: 'config', vehicles, clinics, ts: Date.now() });
-  } catch (err) {
-    console.error('[Config] błąd:', err.message);
-    const cached = await dbGet('session', 'config');
-    if (cached) { vehicles = cached.vehicles || []; clinics = cached.clinics || []; }
+// ── Token / sesja ─────────────────────────────────────────────────
+function resolveSession() {
+  var params   = new URLSearchParams(window.location.search);
+  var urlToken = params.get('t');
+  if (urlToken) {
+    return dbPut('session', { key: 'token', token: urlToken })
+      .then(function() { return { token: urlToken }; });
   }
-  renderVehicleSelects();
-  renderClinicList('');
+  return dbGet('session', 'token').then(function(cached) {
+    if (cached && cached.token) return { token: cached.token };
+    return null;
+  });
 }
+
+// ── POST do GAS ───────────────────────────────────────────────────
+function gasPost(payload) {
+  return fetch(GAS_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body:    JSON.stringify(payload)
+  }).then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }).then(function(data) {
+    if (data.status === 'error') throw new Error(data.message);
+    return data;
+  });
+}
+
+// ── Offline badge ─────────────────────────────────────────────────
+window.addEventListener('offline', function() {
+  document.getElementById('offline-badge').classList.add('show');
+});
+window.addEventListener('online', function() {
+  document.getElementById('offline-badge').classList.remove('show');
+});
+if (!navigator.onLine) document.getElementById('offline-badge').classList.add('show');
 
 // ── Tabs ──────────────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => {
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
       b.classList.remove('active'); b.setAttribute('aria-selected','false');
     });
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
     document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
   });
 });
 
-// ── Clinic search ─────────────────────────────────────────────────
-document.getElementById('clinic-search').addEventListener('input', e => {
-  renderClinicList(e.target.value.trim().toLowerCase());
-});
+// ── Render vehicles ───────────────────────────────────────────────
+function renderVehicleSelects() {
+  ['vehicle-photos','vehicle-notes','vehicle-resources'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— wybierz pojazd —</option>';
+    vehicles.forEach(function(v) {
+      var o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+  });
+}
 
+// ── Render clinic list ────────────────────────────────────────────
 function renderClinicList(q) {
-  const list = document.getElementById('clinic-list');
-  if (q.length < 2) {
-    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
-      'Wpisz co najmniej 2 litery…</div>';
+  var list = document.getElementById('clinic-list');
+  if (!q || q.length < 2) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Wpisz co najmniej 2 litery...</div>';
     return;
   }
-  const filtered = clinics.filter(c => c.name.toLowerCase().includes(q));
+  var filtered = clinics.filter(function(c) {
+    return c.name.toLowerCase().includes(q.toLowerCase());
+  });
   if (!filtered.length) {
-    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">' +
-      'Brak wyników</div>';
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Brak wynikow</div>';
     return;
   }
-  list.innerHTML = filtered.map(c =>
-    `<div class="clinic-item${selClinic && selClinic.id===c.id?' selected':''}"
-      data-id="${c.id}" data-name="${c.name.replace(/"/g,'&quot;')}">${c.name}</div>`
-  ).join('');
-  list.querySelectorAll('.clinic-item').forEach(el => {
-    el.addEventListener('click', () => {
+  list.innerHTML = filtered.map(function(c) {
+    var sel = selClinic && selClinic.id == c.id ? ' selected' : '';
+    return '<div class="clinic-item' + sel + '" data-id="' + c.id + '" data-name="' + c.name.replace(/"/g,'&quot;') + '">' + c.name + '</div>';
+  }).join('');
+  list.querySelectorAll('.clinic-item').forEach(function(el) {
+    el.addEventListener('click', function() {
       selClinic = { id: el.dataset.id, name: el.dataset.name };
       document.getElementById('clinic-search').value = '';
       renderClinicList('');
@@ -424,7 +394,32 @@ function renderClinicList(q) {
   });
 }
 
-document.getElementById('clinic-badge-clear').addEventListener('click', () => {
+// ── Load config ───────────────────────────────────────────────────
+function loadConfig() {
+  gasPost({ action: 'getConfig' })
+    .then(function(data) {
+      console.log('[Config]', JSON.stringify(data).substring(0, 200));
+      vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
+      clinics  = Array.isArray(data.clinics)  ? data.clinics  : [];
+      return dbPut('session', { key: 'config', vehicles: vehicles, clinics: clinics, ts: Date.now() });
+    })
+    .catch(function(err) {
+      console.warn('[Config] error:', err.message);
+      return dbGet('session', 'config').then(function(cached) {
+        if (cached) { vehicles = cached.vehicles || []; clinics = cached.clinics || []; }
+      });
+    })
+    .then(function() {
+      renderVehicleSelects();
+      renderClinicList('');
+    });
+}
+
+// ── Clinic search ─────────────────────────────────────────────────
+document.getElementById('clinic-search').addEventListener('input', function(e) {
+  renderClinicList(e.target.value.trim());
+});
+document.getElementById('clinic-badge-clear').addEventListener('click', function() {
   selClinic = null;
   document.getElementById('clinic-badge').classList.remove('show');
 });
@@ -432,117 +427,147 @@ document.getElementById('clinic-badge-clear').addEventListener('click', () => {
 // ── File input ────────────────────────────────────────────────────
 document.getElementById('file-input').addEventListener('change', function() {
   selFiles = Array.from(this.files);
-  const area = document.getElementById('upload-area');
-  const txt  = document.getElementById('upload-text');
-  const cnt  = document.getElementById('upload-count');
+  var area = document.getElementById('upload-area');
+  var txt  = document.getElementById('upload-text');
+  var cnt  = document.getElementById('upload-count');
   if (selFiles.length) {
     area.classList.add('has-files');
-    txt.textContent = `Wybrano ${selFiles.length} zdjęcie/zdjęcia`;
-    cnt.textContent = `(maks. 20 — wybrano ${selFiles.length})`;
+    txt.textContent = 'Wybrano ' + selFiles.length + ' zdjecie/zdjecia';
+    cnt.textContent = '(maks. 20 — wybrano ' + selFiles.length + ')';
   } else {
     area.classList.remove('has-files');
-    txt.textContent = 'Dotknij aby dodać zdjęcia';
+    txt.textContent = 'Dotknij aby dodac zdjecia';
     cnt.textContent = '';
   }
   document.getElementById('btn-send-photos').disabled = !selFiles.length;
   hideAlert('photos');
 });
 
+// ── Compress image ────────────────────────────────────────────────
+function compressImage(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.width, h = img.height, MAX = 1400;
+        if (w > MAX || h > MAX) {
+          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+          else        { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        resolve(dataUrl.split(',')[1]);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 // ── Send photos ───────────────────────────────────────────────────
-document.getElementById('btn-send-photos').addEventListener('click', async () => {
-  const vehicle = document.getElementById('vehicle-photos').value;
+document.getElementById('btn-send-photos').addEventListener('click', function() {
+  var vehicle = document.getElementById('vehicle-photos').value;
   if (!vehicle) { showAlert('photos','error','Wybierz pojazd'); return; }
-  if (!selFiles.length) { showAlert('photos','error','Wybierz zdjęcia'); return; }
-  const btn = document.getElementById('btn-send-photos');
+  if (!selFiles.length) { showAlert('photos','error','Wybierz zdjecia'); return; }
+
+  var btn = document.getElementById('btn-send-photos');
   btn.disabled = true;
-  showProgress(0,'Przygotowuję…');
+  showProgress(5, 'Kompresuje zdjecia...');
   hideAlert('photos');
-  try {
-    await queuePhotos({
-      token: session.token, vehicle, files: selFiles,
-      onProgress: (msg, pct) => showProgress(pct, msg)
+
+  var promises = selFiles.map(function(f, i) {
+    return compressImage(f).then(function(b64) {
+      showProgress(5 + Math.round((i+1)/selFiles.length*50), 'Kompresuje ' + (i+1) + '/' + selFiles.length + '...');
+      return b64;
     });
+  });
+
+  Promise.all(promises).then(function(compressed) {
+    showProgress(60, 'Wysylam...');
+    return gasPost({ action: 'uploadPhotos', token: session.token, vehicle: vehicle, photos: compressed });
+  }).then(function() {
     selFiles = [];
     document.getElementById('file-input').value = '';
     document.getElementById('upload-area').classList.remove('has-files');
-    document.getElementById('upload-text').textContent = 'Dotknij aby dodać zdjęcia';
+    document.getElementById('upload-text').textContent = 'Dotknij aby dodac zdjecia';
     document.getElementById('upload-count').textContent = '';
     hideProgress();
-    document.getElementById('photos-ok-msg').textContent =
-      `Zdjęcia pojazdu ${vehicle} zostały zapisane ✅`;
+    document.getElementById('photos-ok-msg').textContent = 'Zdjecia pojazdu ' + vehicle + ' zapisane';
     showAlert('photos','success');
-  } catch (err) {
+  }).catch(function(err) {
     hideProgress();
-    showAlert('photos','error', err.message || 'Błąd wysyłania');
-  } finally {
+    showAlert('photos','error', err.message || 'Blad wysylania');
+  }).finally(function() {
     btn.disabled = false;
-  }
+  });
 });
 
 // ── Send note ─────────────────────────────────────────────────────
-document.getElementById('btn-send-note').addEventListener('click', async () => {
-  const vehicle = document.getElementById('vehicle-notes').value;
-  const note    = document.getElementById('note-text').value;
-  const btn     = document.getElementById('btn-send-note');
+document.getElementById('btn-send-note').addEventListener('click', function() {
+  var vehicle = document.getElementById('vehicle-notes').value;
+  var note    = document.getElementById('note-text').value;
+  var btn     = document.getElementById('btn-send-note');
   hideAlert('note');
-  btn.disabled = true; btn.textContent = 'Zapisuję…';
-  try {
-    await saveNote({ token: session.token, vehicle, note });
-    document.getElementById('note-text').value = '';
-    showAlert('note','success');
-  } catch (err) {
-    document.getElementById('note-err-msg').textContent = err.message;
-    showAlert('note','error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-      <polyline points="17 21 17 13 7 13 7 21"/>
-      <polyline points="7 3 7 8 15 8"/></svg> Zapisz notatkę`;
-  }
+  if (!vehicle) { showAlert('note','error','Wybierz pojazd'); return; }
+  if (!note.trim()) { showAlert('note','error','Wpisz tresc notatki'); return; }
+  btn.disabled = true; btn.textContent = 'Zapisuje...';
+  gasPost({ action: 'saveNote', token: session.token, vehicle: vehicle, note: note.trim() })
+    .then(function() {
+      document.getElementById('note-text').value = '';
+      showAlert('note','success');
+    }).catch(function(err) {
+      document.getElementById('note-err-msg').textContent = err.message;
+      showAlert('note','error');
+    }).finally(function() {
+      btn.disabled = false; btn.textContent = 'Zapisz notatke';
+    });
 });
 
 // ── Send resource ─────────────────────────────────────────────────
-document.getElementById('btn-send-res').addEventListener('click', async () => {
-  const vehicle = document.getElementById('vehicle-resources').value;
-  const items   = document.getElementById('resource-items').value;
-  const note    = document.getElementById('resource-note').value;
-  const btn     = document.getElementById('btn-send-res');
+document.getElementById('btn-send-res').addEventListener('click', function() {
+  var vehicle = document.getElementById('vehicle-resources').value;
+  var items   = document.getElementById('resource-items').value;
+  var note    = document.getElementById('resource-note').value;
+  var btn     = document.getElementById('btn-send-res');
   hideAlert('res');
-  btn.disabled = true; btn.textContent = 'Zapisuję…';
-  try {
-    await saveResource({ token: session.token, vehicle, clinic: selClinic, items, note });
-    document.getElementById('resource-items').value = '';
-    document.getElementById('resource-note').value  = '';
-    selClinic = null;
-    document.getElementById('clinic-badge').classList.remove('show');
-    showAlert('res','success');
-  } catch (err) {
-    document.getElementById('res-err-msg').textContent = err.message;
-    showAlert('res','error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="22" y1="2" x2="11" y2="13"/>
-      <polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Zapisz przekazanie`;
-  }
+  if (!vehicle)      { showAlert('res','error','Wybierz pojazd'); return; }
+  if (!selClinic)    { showAlert('res','error','Wybierz lecznice'); return; }
+  if (!items.trim()) { showAlert('res','error','Wpisz przekazane zasoby'); return; }
+  btn.disabled = true; btn.textContent = 'Zapisuje...';
+  gasPost({ action: 'saveResource', token: session.token, vehicle: vehicle,
+            clinic: selClinic, items: items.trim(), note: note.trim() })
+    .then(function() {
+      document.getElementById('resource-items').value = '';
+      document.getElementById('resource-note').value  = '';
+      selClinic = null;
+      document.getElementById('clinic-badge').classList.remove('show');
+      showAlert('res','success');
+    }).catch(function(err) {
+      document.getElementById('res-err-msg').textContent = err.message;
+      showAlert('res','error');
+    }).finally(function() {
+      btn.disabled = false; btn.textContent = 'Zapisz przekazanie';
+    });
 });
 
 // ── Helpers ───────────────────────────────────────────────────────
 function showAlert(prefix, type, msg) {
-  const el = document.getElementById(prefix + '-' + (type === 'success' ? 'ok' : 'err'));
+  var el = document.getElementById(prefix + '-' + (type === 'success' ? 'ok' : 'err'));
   if (msg && type === 'error') {
-    const m = document.getElementById(prefix + '-err-msg');
+    var m = document.getElementById(prefix + '-err-msg');
     if (m) m.textContent = msg;
   }
   el.classList.add('show');
-  if (type === 'success') setTimeout(() => el.classList.remove('show'), 4000);
+  if (type === 'success') setTimeout(function() { el.classList.remove('show'); }, 4000);
 }
 function hideAlert(prefix) {
-  ['ok','err'].forEach(s => {
-    const el = document.getElementById(prefix + '-' + s);
+  ['ok','err'].forEach(function(s) {
+    var el = document.getElementById(prefix + '-' + s);
     if (el) el.classList.remove('show');
   });
 }
@@ -553,6 +578,23 @@ function showProgress(pct, label) {
 }
 function hideProgress() {
   document.getElementById('progress-wrap').classList.remove('show');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────
+resolveSession().then(function(s) {
+  if (!s) { window.location.href = './index.html'; return; }
+  session = s;
+  var name = session.token.split('-')[0];
+  document.getElementById('driver-name').textContent =
+    name.charAt(0).toUpperCase() + name.slice(1);
+  loadConfig();
+});
+
+// ── Service Worker ────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function(e) {
+    console.warn('[SW]', e);
+  });
 }
 </script>
 </body>
