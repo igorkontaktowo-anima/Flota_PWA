@@ -263,7 +263,9 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 
 <script>
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbz3A9LWbqrjO7KlYMoHNivf6Hbpe4zLVjWfWu8Iizcl_gmlILqt6-cESOTpK09gwSLl/exec';
-var DB_NAME = 'flota_pwa';
+var DB_NAME = 'flotaDB';
+var DB_VER  = 1;
+
 
 // Stan
 var session   = null;
@@ -273,10 +275,11 @@ var resources = [];
 var selClinic = null;
 var selFiles  = [];
 
+
 // ── IndexedDB ─────────────────────────────────────────────────────
 function openDB() {
   return new Promise(function(resolve, reject) {
-    var req = indexedDB.open(DB_NAME, 1);
+    var req = indexedDB.open(DB_NAME, DB_VER);
     req.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (!db.objectStoreNames.contains('session'))
