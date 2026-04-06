@@ -284,8 +284,28 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
     </div>
     <div class="card">
       <div class="card-title">Zasob</div>
-      <label class="field-label" for="resource-select">Co przekazano</label>
-      <select id="resource-select"><option value="">— wybierz zasob —</option></select>
+      <label class="field-label">Co przekazano</label>
+<div class="search-wrap">
+  <span class="search-icon">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </span>
+  <input type="text" id="resource-search" 
+         placeholder="Wpisz nazwę zasobu..." autocomplete="off">
+</div>
+<div class="clinic-list" id="resource-list">
+  <div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">
+    Wpisz co najmniej 1 literę...
+  </div>
+</div>
+<div class="clinic-selected-badge" id="resource-badge">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+       stroke="currentColor" stroke-width="2.5">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+  <span id="resource-badge-text"></span>
+  <span class="badge-clear" id="resource-badge-clear">&#x2715;</span>
+</div>
       <label class="field-label" style="margin-top:1rem">Ilosc</label>
       <div class="qty-row">
         <button type="button" class="qty-btn" id="qty-minus">&#x2212;</button>
@@ -432,12 +452,53 @@ function renderResourceSelect() {
   });
 }
 
+// ── Render resource list ────────────────────────────────────────
+var selResource = null;
+
+function renderResourceList(q) {
+  var list = document.getElementById('resource-list');
+  if (!q || q.length < 1) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Wpisz co najmniej 1 literę...</div>';
+    return;
+  }
+  var filtered = resources.filter(function(r) {
+    return r.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+  });
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Brak wyników</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(r) {
+    var sel = selResource === r ? ' selected' : '';
+    return '<div class="clinic-item' + sel + '" data-name="' + r.replace(/"/g,'&quot;') + '">' + r + '</div>';
+  }).join('');
+  list.querySelectorAll('.clinic-item').forEach(function(el) {
+    el.addEventListener('click', function() {
+      selResource = el.dataset.name;
+      document.getElementById('resource-search').value = '';
+      renderResourceList('');
+      document.getElementById('resource-badge-text').textContent = selResource;
+      document.getElementById('resource-badge').classList.add('show');
+      updateQtyMode(); // aktualizuj szt./litry
+    });
+  });
+}
+
+document.getElementById('resource-search').addEventListener('input', function(e) {
+  renderResourceList(e.target.value.trim());
+});
+document.getElementById('resource-badge-clear').addEventListener('click', function() {
+  selResource = null;
+  document.getElementById('resource-badge').classList.remove('show');
+});
+
+
 // ── Logika ilosci: szt. vs litry ──────────────────────────────────
 function isLitres(name) {
   return name && name.toLowerCase().indexOf('[litry]') !== -1;
 }
 function updateQtyMode() {
-  var name = document.getElementById('resource-select').value;
+  var name = selResource || '';
   var inp  = document.getElementById('qty-input');
   var unit = document.getElementById('qty-unit');
   if (isLitres(name)) {
@@ -450,10 +511,9 @@ function updateQtyMode() {
     inp.value = '1';
   }
 }
-document.getElementById('resource-select').addEventListener('change', updateQtyMode);
 document.getElementById('qty-minus').addEventListener('click', function() {
-  var inp  = document.getElementById('qty-input');
-  var name = document.getElementById('resource-select').value;
+  var inp = document.getElementById('qty-input');
+  var name = selResource || '';
   var step = parseFloat(inp.step) || 1;
   var val  = parseFloat(inp.value) || step;
   var min  = parseFloat(inp.min)  || step;
@@ -461,8 +521,8 @@ document.getElementById('qty-minus').addEventListener('click', function() {
   inp.value = isLitres(name) ? nval.toFixed(2) : String(Math.round(nval));
 });
 document.getElementById('qty-plus').addEventListener('click', function() {
-  var inp  = document.getElementById('qty-input');
-  var name = document.getElementById('resource-select').value;
+  var inp = document.getElementById('qty-input');
+  var name = selResource || '';
   var step = parseFloat(inp.step) || 1;
   var val  = parseFloat(inp.value) || 0;
   var nval = parseFloat((val + step).toFixed(4));
@@ -520,8 +580,8 @@ function loadConfig() {
     })
     .then(function() {
       renderVehicleSelects();
-      renderClinicList('');
-      renderResourceSelect();
+renderClinicList('');
+renderResourceList('');
     });
 }
 
@@ -631,7 +691,7 @@ document.getElementById('btn-send-note').addEventListener('click', function() {
 
 // ── Send resource ─────────────────────────────────────────────────
 document.getElementById('btn-send-res').addEventListener('click', function() {
-  var resource = document.getElementById('resource-select').value;
+  var resource = selResource || '';
   var qty      = parseFloat(document.getElementById('qty-input').value);
   var btn      = document.getElementById('btn-send-res');
   hideAlert('res');
@@ -642,14 +702,17 @@ document.getElementById('btn-send-res').addEventListener('click', function() {
   gasPost({ action: 'saveResource', token: session.token,
             clinic: selClinic, resource: resource, quantity: qty })
     .then(function() {
-      document.getElementById('resource-select').value = '';
-      document.getElementById('qty-input').value = '1';
-      document.getElementById('qty-unit').textContent = 'szt.';
-      selClinic = null;
-      document.getElementById('clinic-badge').classList.remove('show');
-      document.getElementById('clinic-search').value = '';
-      renderClinicList('');
-      showAlert('res','success');
+    selResource = null;
+document.getElementById('resource-badge').classList.remove('show');
+document.getElementById('resource-search').value = '';
+renderResourceList('');
+document.getElementById('qty-input').value = 1;
+document.getElementById('qty-unit').textContent = 'szt.';
+selClinic = null;
+document.getElementById('clinic-badge').classList.remove('show');
+document.getElementById('clinic-search').value = '';
+renderClinicList('');
+showAlert('res', 'success'); 
     }).catch(function(err) {
       document.getElementById('res-err-msg').textContent = err.message;
       showAlert('res','error');
