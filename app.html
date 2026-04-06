@@ -91,15 +91,60 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
   font-size:.9rem;font-weight:600;margin-top:.5rem;align-items:center;gap:.5rem}
 .clinic-selected-badge.show{display:flex}
 .badge-clear{margin-left:auto;cursor:pointer;font-size:1.2rem;line-height:1;color:var(--c-muted)}
-.qty-row{display:flex;align-items:center;gap:.75rem;margin-top:.25rem}
-.qty-btn{width:48px;height:48px;border:1.5px solid var(--c-border);border-radius:var(--r);
-  background:var(--c-surface);font-size:1.4rem;font-weight:700;color:var(--c-primary);
-  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.qty-btn:active{background:var(--c-primary-light)}
-.qty-input{flex:1;padding:.75rem;border:1.5px solid var(--c-border);border-radius:var(--r);
-  font-size:1.2rem;font-weight:700;text-align:center;color:var(--c-text);background:var(--c-surface)}
-.qty-input:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-light)}
-.qty-unit{font-size:.82rem;color:var(--c-muted);font-weight:600;min-width:36px}
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .25rem;
+}
+.qty-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r);
+  background: var(--c-surface);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--c-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qty-btn:active { background: var(--c-primary-light); }
+.qty-input {
+  flex: 1;
+  min-width: 0;          /* ← kluczowe: pozwala flex-item się skurczyć */
+  padding: .75rem .5rem;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--c-text);
+  background: var(--c-surface);
+  /* ukryj natywne strzałki number input */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-input:focus {
+  outline: none;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px var(--c-primary-light);
+}
+.qty-unit {
+  font-size: .82rem;
+  color: var(--c-muted);
+  font-weight: 600;
+  min-width: 28px;
+  flex-shrink: 0;
+}
 .upload-area{border:2px dashed var(--c-border);border-radius:var(--r);
   padding:2rem 1rem;text-align:center;cursor:pointer;
   transition:border-color .2s,background .2s;position:relative}
