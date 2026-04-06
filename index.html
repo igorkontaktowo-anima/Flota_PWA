@@ -6,33 +6,10 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#01696f" />
-  <!-- Manifest z tokenem dla PWA -->
-<script>
-  (function() {
-    var t = new URLSearchParams(location.search).get('t');
-    if (t) {
-      var m = {
-        name:"Flota PWA", short_name:"Flota",
-        description:"Aplikacja dla kurierów - zdjęcia, notatki, zasoby",
-        start_url:"./index.html?t=" + encodeURIComponent(t),
-        scope:".", display:"standalone", orientation:"portrait",
-        background_color:"#f4f4f9", theme_color:"#01696f",
-        icons:[
-          {src:"./icons/icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},
-          {src:"./icons/icon-192.png",sizes:"192x192",type:"image/png",purpose:"maskable"},
-          {src:"./icons/icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},
-          {src:"./icons/icon-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}
-        ]
-      };
-      var blob = new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
-      var url = URL.createObjectURL(blob);
-      document.write('<link rel="manifest" href="'+url+'">');
-    } else {
-      document.write('<link rel="manifest" href="manifest.json">');
-    }
-  })();
-</script>
+ 
   <title>Flota PWA</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
@@ -203,8 +180,8 @@
       </svg>
     </div>
     <p class="error-title">Brak dostępu</p>
-    <p class="error-msg">Nie udało się zweryfikować Twojego dostępu do aplikacji.</p>
-    <p class="error-note">Skontaktuj się z administratorem,<br>aby otrzymać nowy kod QR.</p>
+    <p class="error-msg">Aby uruchomić aplikację, zeskanuj kod QR.</p>
+    <p class="error-note">Jeśli kod QR masz już zapisany — zeskanuj go ponownie. Jeśli nie masz kodu, skontaktuj się z administratorem.</p>
   </div>
 
 </div>
@@ -228,39 +205,34 @@
   })();
 
   /* ── Auth logic ── */
-  (function () {
-    const SESSION_KEY = 'flota_token';
-    const APP_PAGE    = 'app.html';       // ← docelowy plik głównej aplikacji
+ 
+const TOKENKEY = 'flota_token';
+const APPPAGE = 'app.html';
 
-    function showError() {
-      document.getElementById('stateLoading').style.display = 'none';
-      document.getElementById('stateError').style.display   = 'flex';
-    }
+function showError() {
+  document.getElementById('stateLoading').style.display = 'none';
+  document.getElementById('stateError').style.display = 'flex';
+}
 
-    function go(token) {
-      try { sessionStorage.setItem(SESSION_KEY, token); } catch (e) { /* sandboxed – ignoruj */ }
-      // Przekierowanie — token przeniesiony przez sessionStorage; w URL tylko jako fallback
-      window.location.replace(APP_PAGE + '?t=' + encodeURIComponent(token));
-    }
+function go(token) {
+  localStorage.setItem(TOKENKEY, token);
+  window.location.replace(APPPAGE + '?t=' + encodeURIComponent(token));
+}
 
-    /* 1 — token w URL (?t=...) — typowe wejście przez QR */
-    const urlToken = new URLSearchParams(window.location.search).get('t');
-    if (urlToken && urlToken.trim() !== '') {
-      go(urlToken.trim());
-      return;
-    }
-
-    /* 2 — brak tokenu w URL, ale jest w sessionStorage (np. odświeżenie F5) */
-    let storedToken = null;
-    try { storedToken = sessionStorage.getItem(SESSION_KEY); } catch (e) {}
-    if (storedToken && storedToken.trim() !== '') {
-      go(storedToken.trim());
-      return;
-    }
-
-    /* 3 — brak tokenu w obu miejscach → blokada */
+// 1. Token w URL (wejście przez QR)
+const urlToken = new URLSearchParams(location.search).get('t');
+if (urlToken && urlToken.trim()) {
+  go(urlToken.trim());
+} else {
+  // 2. Token w localStorage (powrót z ikony — Android)
+  const savedToken = localStorage.getItem(TOKENKEY);
+  if (savedToken && savedToken.trim()) {
+    go(savedToken.trim());
+  } else {
+    // 3. Brak tokenu — blokada z komunikatem
     setTimeout(showError, 550);
-  })();
+  }
+}
 </script>
 
 </body>
