@@ -91,6 +91,15 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
   font-size:.9rem;font-weight:600;margin-top:.5rem;align-items:center;gap:.5rem}
 .clinic-selected-badge.show{display:flex}
 .badge-clear{margin-left:auto;cursor:pointer;font-size:1.2rem;line-height:1;color:var(--c-muted)}
+.qty-row{display:flex;align-items:center;gap:.75rem;margin-top:.25rem}
+.qty-btn{width:48px;height:48px;border:1.5px solid var(--c-border);border-radius:var(--r);
+  background:var(--c-surface);font-size:1.4rem;font-weight:700;color:var(--c-primary);
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.qty-btn:active{background:var(--c-primary-light)}
+.qty-input{flex:1;padding:.75rem;border:1.5px solid var(--c-border);border-radius:var(--r);
+  font-size:1.2rem;font-weight:700;text-align:center;color:var(--c-text);background:var(--c-surface)}
+.qty-input:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-light)}
+.qty-unit{font-size:.82rem;color:var(--c-muted);font-weight:600;min-width:36px}
 .upload-area{border:2px dashed var(--c-border);border-radius:var(--r);
   padding:2rem 1rem;text-align:center;cursor:pointer;
   transition:border-color .2s,background .2s;position:relative}
@@ -152,6 +161,8 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
 </nav>
 
 <main class="panels">
+
+  <!-- ZDJECIA -->
   <section class="panel active" id="panel-photos">
     <div class="card">
       <div class="card-title">Pojazd</div>
@@ -187,6 +198,7 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
     </div>
   </section>
 
+  <!-- NOTATKA -->
   <section class="panel" id="panel-notes">
     <div class="card">
       <div class="card-title">Pojazd</div>
@@ -208,11 +220,8 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
     </div>
   </section>
 
+  <!-- PRZEKAZANIE -->
   <section class="panel" id="panel-resources">
-    <div class="card">
-      <div class="card-title">Pojazd</div>
-      <select id="vehicle-resources"><option value="">— wybierz pojazd —</option></select>
-    </div>
     <div class="card">
       <div class="card-title">Lecznica</div>
       <div class="search-wrap">
@@ -229,11 +238,16 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Przekazane zasoby</div>
-      <label class="field-label" for="resource-items">Co przekazano</label>
-      <textarea id="resource-items" placeholder="np. Odczynniki PCR x2..." style="min-height:90px"></textarea>
-      <label class="field-label" style="margin-top:.75rem" for="resource-note">Uwagi (opcjonalnie)</label>
-      <textarea id="resource-note" placeholder="Dodatkowe uwagi..." style="min-height:70px"></textarea>
+      <div class="card-title">Zasob</div>
+      <label class="field-label" for="resource-select">Co przekazano</label>
+      <select id="resource-select"><option value="">— wybierz zasob —</option></select>
+      <label class="field-label" style="margin-top:1rem">Ilosc</label>
+      <div class="qty-row">
+        <button type="button" class="qty-btn" id="qty-minus">&#x2212;</button>
+        <input type="number" class="qty-input" id="qty-input" value="1" min="1" step="1">
+        <span class="qty-unit" id="qty-unit">szt.</span>
+        <button type="button" class="qty-btn" id="qty-plus">&#x2B;</button>
+      </div>
       <div class="alert alert-success" id="res-ok"><span class="alert-icon">&#x2705;</span> Przekazanie zapisane</div>
       <div class="alert alert-error" id="res-err"><span class="alert-icon">&#x26A0;&#xFE0F;</span><span id="res-err-msg"></span></div>
       <button class="btn btn-primary" id="btn-send-res">
@@ -244,20 +258,18 @@ textarea:focus{outline:none;border-color:var(--c-primary);box-shadow:0 0 0 3px v
       </button>
     </div>
   </section>
+
 </main>
 
 <script>
-// ================================================================
-//  app.html — inline script (bez ES6 modules — pewniejszy na GitHub Pages)
-// ================================================================
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbz3A9LWbqrjO7KlYMoHNivf6Hbpe4zLVjWfWu8Iizcl_gmlILqt6-cESOTpK09gwSLl/exec';
+var DB_NAME = 'flota_pwa';
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbz3A9LWbqrjO7KlYMoHNivf6Hbpe4zLVjWfWu8Iizcl_gmlILqt6-cESOTpK09gwSLl/exec';
-const DB_NAME = 'flota_pwa';
-
-// ── Stan aplikacji ────────────────────────────────────────────────
+// Stan
 var session   = null;
 var vehicles  = [];
 var clinics   = [];
+var resources = [];
 var selClinic = null;
 var selFiles  = [];
 
@@ -269,14 +281,11 @@ function openDB() {
       var db = e.target.result;
       if (!db.objectStoreNames.contains('session'))
         db.createObjectStore('session', { keyPath: 'key' });
-      if (!db.objectStoreNames.contains('photo_queue'))
-        db.createObjectStore('photo_queue', { keyPath: 'id', autoIncrement: true });
     };
     req.onsuccess = function(e) { resolve(e.target.result); };
     req.onerror   = function(e) { reject(e.target.error); };
   });
 }
-
 function dbPut(storeName, value) {
   return openDB().then(function(db) {
     return new Promise(function(resolve, reject) {
@@ -287,7 +296,6 @@ function dbPut(storeName, value) {
     });
   });
 }
-
 function dbGet(storeName, key) {
   return openDB().then(function(db) {
     return new Promise(function(resolve, reject) {
@@ -299,7 +307,7 @@ function dbGet(storeName, key) {
   });
 }
 
-// ── Token / sesja ─────────────────────────────────────────────────
+// ── Token ─────────────────────────────────────────────────────────
 function resolveSession() {
   var params   = new URLSearchParams(window.location.search);
   var urlToken = params.get('t');
@@ -328,7 +336,7 @@ function gasPost(payload) {
   });
 }
 
-// ── Offline badge ─────────────────────────────────────────────────
+// ── Offline ───────────────────────────────────────────────────────
 window.addEventListener('offline', function() {
   document.getElementById('offline-badge').classList.add('show');
 });
@@ -354,7 +362,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
 
 // ── Render vehicles ───────────────────────────────────────────────
 function renderVehicleSelects() {
-  ['vehicle-photos','vehicle-notes','vehicle-resources'].forEach(function(id) {
+  ['vehicle-photos','vehicle-notes'].forEach(function(id) {
     var sel = document.getElementById(id);
     sel.innerHTML = '<option value="">— wybierz pojazd —</option>';
     vehicles.forEach(function(v) {
@@ -365,6 +373,54 @@ function renderVehicleSelects() {
   });
 }
 
+// ── Render resource select ────────────────────────────────────────
+function renderResourceSelect() {
+  var sel = document.getElementById('resource-select');
+  sel.innerHTML = '<option value="">— wybierz zasob —</option>';
+  resources.forEach(function(r) {
+    var o = document.createElement('option');
+    o.value = r; o.textContent = r;
+    sel.appendChild(o);
+  });
+}
+
+// ── Logika ilosci: szt. vs litry ──────────────────────────────────
+function isLitres(name) {
+  return name && name.toLowerCase().indexOf('[litry]') !== -1;
+}
+function updateQtyMode() {
+  var name = document.getElementById('resource-select').value;
+  var inp  = document.getElementById('qty-input');
+  var unit = document.getElementById('qty-unit');
+  if (isLitres(name)) {
+    inp.step = '0.25'; inp.min = '0.25';
+    unit.textContent = 'l';
+    inp.value = '0.25';
+  } else {
+    inp.step = '1'; inp.min = '1';
+    unit.textContent = 'szt.';
+    inp.value = '1';
+  }
+}
+document.getElementById('resource-select').addEventListener('change', updateQtyMode);
+document.getElementById('qty-minus').addEventListener('click', function() {
+  var inp  = document.getElementById('qty-input');
+  var name = document.getElementById('resource-select').value;
+  var step = parseFloat(inp.step) || 1;
+  var val  = parseFloat(inp.value) || step;
+  var min  = parseFloat(inp.min)  || step;
+  var nval = Math.max(min, parseFloat((val - step).toFixed(4)));
+  inp.value = isLitres(name) ? nval.toFixed(2) : String(Math.round(nval));
+});
+document.getElementById('qty-plus').addEventListener('click', function() {
+  var inp  = document.getElementById('qty-input');
+  var name = document.getElementById('resource-select').value;
+  var step = parseFloat(inp.step) || 1;
+  var val  = parseFloat(inp.value) || 0;
+  var nval = parseFloat((val + step).toFixed(4));
+  inp.value = isLitres(name) ? nval.toFixed(2) : String(Math.round(nval));
+});
+
 // ── Render clinic list ────────────────────────────────────────────
 function renderClinicList(q) {
   var list = document.getElementById('clinic-list');
@@ -373,13 +429,13 @@ function renderClinicList(q) {
     return;
   }
   var filtered = clinics.filter(function(c) {
-    return c.name.toLowerCase().includes(q.toLowerCase());
+    return c.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
   });
   if (!filtered.length) {
-    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Brak wynikow</div>';
+    list.innerHTML = '<div style="padding:.75rem 1rem;color:var(--c-muted);font-size:.88rem">Brak wynikow dla: ' + q + '</div>';
     return;
   }
-  list.innerHTML = filtered.map(function(c) {
+  list.innerHTML = filtered.slice(0,40).map(function(c) {
     var sel = selClinic && selClinic.id == c.id ? ' selected' : '';
     return '<div class="clinic-item' + sel + '" data-id="' + c.id + '" data-name="' + c.name.replace(/"/g,'&quot;') + '">' + c.name + '</div>';
   }).join('');
@@ -398,20 +454,26 @@ function renderClinicList(q) {
 function loadConfig() {
   gasPost({ action: 'getConfig' })
     .then(function(data) {
-      console.log('[Config]', JSON.stringify(data).substring(0, 200));
-      vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
-      clinics  = Array.isArray(data.clinics)  ? data.clinics  : [];
-      return dbPut('session', { key: 'config', vehicles: vehicles, clinics: clinics, ts: Date.now() });
+      console.log('[Config]', JSON.stringify(data).substring(0, 300));
+      vehicles  = Array.isArray(data.vehicles)  ? data.vehicles  : [];
+      clinics   = Array.isArray(data.clinics)   ? data.clinics   : [];
+      resources = Array.isArray(data.resources) ? data.resources : [];
+      return dbPut('session', { key: 'config', vehicles: vehicles, clinics: clinics, resources: resources, ts: Date.now() });
     })
     .catch(function(err) {
       console.warn('[Config] error:', err.message);
       return dbGet('session', 'config').then(function(cached) {
-        if (cached) { vehicles = cached.vehicles || []; clinics = cached.clinics || []; }
+        if (cached) {
+          vehicles  = cached.vehicles  || [];
+          clinics   = cached.clinics   || [];
+          resources = cached.resources || [];
+        }
       });
     })
     .then(function() {
       renderVehicleSelects();
       renderClinicList('');
+      renderResourceSelect();
     });
 }
 
@@ -458,8 +520,7 @@ function compressImage(file) {
         var canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-        resolve(dataUrl.split(',')[1]);
+        resolve(canvas.toDataURL('image/jpeg', 0.82).split(',')[1]);
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -472,22 +533,18 @@ function compressImage(file) {
 // ── Send photos ───────────────────────────────────────────────────
 document.getElementById('btn-send-photos').addEventListener('click', function() {
   var vehicle = document.getElementById('vehicle-photos').value;
-  if (!vehicle) { showAlert('photos','error','Wybierz pojazd'); return; }
-  if (!selFiles.length) { showAlert('photos','error','Wybierz zdjecia'); return; }
-
+  if (!vehicle)        { showAlert('photos','error','Wybierz pojazd'); return; }
+  if (!selFiles.length){ showAlert('photos','error','Wybierz zdjecia'); return; }
   var btn = document.getElementById('btn-send-photos');
   btn.disabled = true;
   showProgress(5, 'Kompresuje zdjecia...');
   hideAlert('photos');
-
-  var promises = selFiles.map(function(f, i) {
+  Promise.all(selFiles.map(function(f, i) {
     return compressImage(f).then(function(b64) {
       showProgress(5 + Math.round((i+1)/selFiles.length*50), 'Kompresuje ' + (i+1) + '/' + selFiles.length + '...');
       return b64;
     });
-  });
-
-  Promise.all(promises).then(function(compressed) {
+  })).then(function(compressed) {
     showProgress(60, 'Wysylam...');
     return gasPost({ action: 'uploadPhotos', token: session.token, vehicle: vehicle, photos: compressed });
   }).then(function() {
@@ -502,9 +559,7 @@ document.getElementById('btn-send-photos').addEventListener('click', function() 
   }).catch(function(err) {
     hideProgress();
     showAlert('photos','error', err.message || 'Blad wysylania');
-  }).finally(function() {
-    btn.disabled = false;
-  });
+  }).finally(function() { btn.disabled = false; });
 });
 
 // ── Send note ─────────────────────────────────────────────────────
@@ -513,7 +568,7 @@ document.getElementById('btn-send-note').addEventListener('click', function() {
   var note    = document.getElementById('note-text').value;
   var btn     = document.getElementById('btn-send-note');
   hideAlert('note');
-  if (!vehicle) { showAlert('note','error','Wybierz pojazd'); return; }
+  if (!vehicle)     { showAlert('note','error','Wybierz pojazd'); return; }
   if (!note.trim()) { showAlert('note','error','Wpisz tresc notatki'); return; }
   btn.disabled = true; btn.textContent = 'Zapisuje...';
   gasPost({ action: 'saveNote', token: session.token, vehicle: vehicle, note: note.trim() })
@@ -523,36 +578,34 @@ document.getElementById('btn-send-note').addEventListener('click', function() {
     }).catch(function(err) {
       document.getElementById('note-err-msg').textContent = err.message;
       showAlert('note','error');
-    }).finally(function() {
-      btn.disabled = false; btn.textContent = 'Zapisz notatke';
-    });
+    }).finally(function() { btn.disabled = false; btn.textContent = 'Zapisz notatke'; });
 });
 
 // ── Send resource ─────────────────────────────────────────────────
 document.getElementById('btn-send-res').addEventListener('click', function() {
-  var vehicle = document.getElementById('vehicle-resources').value;
-  var items   = document.getElementById('resource-items').value;
-  var note    = document.getElementById('resource-note').value;
-  var btn     = document.getElementById('btn-send-res');
+  var resource = document.getElementById('resource-select').value;
+  var qty      = parseFloat(document.getElementById('qty-input').value);
+  var btn      = document.getElementById('btn-send-res');
   hideAlert('res');
-  if (!vehicle)      { showAlert('res','error','Wybierz pojazd'); return; }
-  if (!selClinic)    { showAlert('res','error','Wybierz lecznice'); return; }
-  if (!items.trim()) { showAlert('res','error','Wpisz przekazane zasoby'); return; }
+  if (!selClinic)       { showAlert('res','error','Wybierz lecznice'); return; }
+  if (!resource)        { showAlert('res','error','Wybierz zasob'); return; }
+  if (!qty || qty <= 0) { showAlert('res','error','Podaj ilosc'); return; }
   btn.disabled = true; btn.textContent = 'Zapisuje...';
-  gasPost({ action: 'saveResource', token: session.token, vehicle: vehicle,
-            clinic: selClinic, items: items.trim(), note: note.trim() })
+  gasPost({ action: 'saveResource', token: session.token,
+            clinic: selClinic, resource: resource, quantity: qty })
     .then(function() {
-      document.getElementById('resource-items').value = '';
-      document.getElementById('resource-note').value  = '';
+      document.getElementById('resource-select').value = '';
+      document.getElementById('qty-input').value = '1';
+      document.getElementById('qty-unit').textContent = 'szt.';
       selClinic = null;
       document.getElementById('clinic-badge').classList.remove('show');
+      document.getElementById('clinic-search').value = '';
+      renderClinicList('');
       showAlert('res','success');
     }).catch(function(err) {
       document.getElementById('res-err-msg').textContent = err.message;
       showAlert('res','error');
-    }).finally(function() {
-      btn.disabled = false; btn.textContent = 'Zapisz przekazanie';
-    });
+    }).finally(function() { btn.disabled = false; btn.textContent = 'Zapisz przekazanie'; });
 });
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -590,7 +643,6 @@ resolveSession().then(function(s) {
   loadConfig();
 });
 
-// ── Service Worker ────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(function(e) {
     console.warn('[SW]', e);
