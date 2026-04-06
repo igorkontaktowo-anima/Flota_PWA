@@ -6,10 +6,38 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#01696f" />
+  <!-- Manifest z tokenem dla PWA -->
+<script>
+  (function() {
+    var t = new URLSearchParams(location.search).get('t');
+    if (t) {
+      var m = {
+        name:"Flota PWA", short_name:"Flota",
+        description:"Aplikacja dla kurierów - zdjęcia, notatki, zasoby",
+        start_url:"./index.html?t=" + encodeURIComponent(t),
+        scope:".", display:"standalone", orientation:"portrait",
+        background_color:"#f4f4f9", theme_color:"#01696f",
+        icons:[
+          {src:"./icons/icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},
+          {src:"./icons/icon-192.png",sizes:"192x192",type:"image/png",purpose:"maskable"},
+          {src:"./icons/icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},
+          {src:"./icons/icon-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}
+        ]
+      };
+      var blob = new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+      var url = URL.createObjectURL(blob);
+      document.write('<link rel="manifest" href="'+url+'">');
+    } else {
+      document.write('<link rel="manifest" href="manifest.json">');
+    }
+  })();
+</script>
   <title>Flota PWA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+
+  
   <style>
     :root, [data-theme="light"] {
       --color-bg:             #f7f6f2;
