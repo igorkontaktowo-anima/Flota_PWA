@@ -1,89 +1,239 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="light">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000080">
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#01696f" />
   <title>Flota PWA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
   <style>
+    :root, [data-theme="light"] {
+      --color-bg:             #f7f6f2;
+      --color-surface:        #f9f8f5;
+      --color-surface-offset: #f0eeea;
+      --color-border:         rgba(40,37,29,0.12);
+      --color-text:           #28251d;
+      --color-text-muted:     #7a7974;
+      --color-text-faint:     #bab9b4;
+      --color-primary:        #01696f;
+      --color-primary-hover:  #0c4e54;
+      --color-error:          #a12c7b;
+      --color-error-bg:       #f9f0f5;
+      --shadow-md: 0 4px 20px rgba(40,37,29,0.09);
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+      --font-body: 'Inter', 'Helvetica Neue', sans-serif;
+      --transition: 180ms cubic-bezier(0.16,1,0.3,1);
+    }
+    [data-theme="dark"] {
+      --color-bg:             #171614;
+      --color-surface:        #1c1b19;
+      --color-surface-offset: #22211f;
+      --color-border:         rgba(205,204,202,0.1);
+      --color-text:           #cdccca;
+      --color-text-muted:     #797876;
+      --color-text-faint:     #5a5957;
+      --color-primary:        #4f98a3;
+      --color-primary-hover:  #227f8b;
+      --color-error:          #d163a7;
+      --color-error-bg:       #2a1a24;
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.38);
+    }
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme]) {
+        --color-bg:#171614; --color-surface:#1c1b19; --color-surface-offset:#22211f;
+        --color-border:rgba(205,204,202,0.1); --color-text:#cdccca; --color-text-muted:#797876;
+        --color-text-faint:#5a5957; --color-primary:#4f98a3; --color-primary-hover:#227f8b;
+        --color-error:#d163a7; --color-error-bg:#2a1a24; --shadow-md:0 4px 20px rgba(0,0,0,0.38);
+      }
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { -webkit-text-size-adjust:none; -webkit-font-smoothing:antialiased; }
     body {
-      margin: 0;
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000080;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height:100dvh; font-family:var(--font-body); font-size:1rem;
+      color:var(--color-text); background:var(--color-bg);
+      display:flex; align-items:center; justify-content:center; padding:1.5rem 1rem;
     }
-    .splash {
-      text-align: center;
-      color: #fff;
+    button { cursor:pointer; background:none; border:none; font:inherit; color:inherit; }
+    :focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; border-radius:4px; }
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
     }
-    .splash img {
-      width: 96px;
-      height: 96px;
-      border-radius: 20px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 24px rgba(0,0,0,.3);
+
+    .card {
+      width:100%; max-width:380px;
+      background:var(--color-surface);
+      border:1px solid var(--color-border);
+      border-radius:var(--radius-xl);
+      box-shadow:var(--shadow-md);
+      padding:2rem 2rem 2.5rem;
+      position:relative;
+      animation:fadeUp 0.42s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .splash h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0 0 .5rem;
-      letter-spacing: .5px;
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
     }
-    .splash p {
-      font-size: .95rem;
-      opacity: .75;
-      margin: 0;
+
+    /* Logo */
+    .logo-wrap { display:flex; align-items:center; gap:0.625rem; margin-bottom:2rem; }
+    .logo-icon  { width:42px; height:42px; flex-shrink:0; color:var(--color-primary); }
+    .logo-name  { font-size:1.125rem; font-weight:700; letter-spacing:-0.02em; color:var(--color-text); line-height:1.1; }
+    .logo-sub   { font-size:0.6875rem; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+
+    /* Spinner */
+    .spinner-wrap { display:flex; flex-direction:column; align-items:center; gap:1.25rem; padding:0.5rem 0; text-align:center; }
+    .spinner {
+      width:46px; height:46px;
+      border:3px solid var(--color-border);
+      border-top-color:var(--color-primary);
+      border-radius:50%;
+      animation:spin 0.85s linear infinite;
     }
-    .error-box {
-      display: none;
-      margin-top: 2rem;
-      background: rgba(255,255,255,.15);
-      border-radius: .75rem;
-      padding: 1rem 1.5rem;
-      font-size: .9rem;
-      max-width: 280px;
-      line-height: 1.5;
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spinner-label { font-size:0.9375rem; color:var(--color-text-muted); }
+
+    /* Error */
+    .error-wrap { display:none; flex-direction:column; align-items:center; gap:1rem; text-align:center; padding:0.5rem 0; }
+    .error-icon {
+      width:54px; height:54px; border-radius:50%;
+      background:var(--color-error-bg);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--color-error);
     }
-    .error-box.show { display: block; }
+    .error-icon svg { width:26px; height:26px; }
+    .error-title { font-size:1.0625rem; font-weight:600; color:var(--color-text); }
+    .error-msg   { font-size:0.875rem; color:var(--color-text-muted); max-width:28ch; line-height:1.6; }
+    .error-note  {
+      font-size:0.8125rem; color:var(--color-text-faint);
+      background:var(--color-surface-offset);
+      border-radius:0.5rem; padding:0.625rem 1rem;
+      margin-top:0.25rem; line-height:1.55;
+    }
+
+    /* Theme toggle */
+    .theme-btn {
+      position:absolute; top:1rem; right:1rem;
+      width:34px; height:34px; border-radius:var(--radius-full);
+      color:var(--color-text-muted);
+      display:flex; align-items:center; justify-content:center;
+      transition:background var(--transition), color var(--transition);
+    }
+    .theme-btn:hover  { background:var(--color-surface-offset); color:var(--color-text); }
+    .theme-btn:active { background:var(--color-border); }
   </style>
 </head>
 <body>
-  <div class="splash">
-    <img src="./icons/icon-192.png" alt="Flota PWA">
-    <h1>Flota PWA</h1>
-    <p id="status-msg">Sprawdzam dostęp…</p>
-    <div class="error-box" id="error-box">
-      Brak tokenu dostępu.<br><br>
-      Otwórz aplikację przez link otrzymany od dyspozytora.
+
+<div class="card" role="main">
+
+  <button class="theme-btn" data-theme-toggle aria-label="Włącz ciemny motyw">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+
+  <div class="logo-wrap" aria-label="Flota PWA">
+    <svg class="logo-icon" viewBox="0 0 42 42" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <rect width="42" height="42" rx="11" fill="currentColor" opacity="0.1"/>
+      <!-- Van body -->
+      <rect x="6" y="18" width="26" height="11" rx="2.5" fill="currentColor"/>
+      <!-- Cab -->
+      <path d="M19 18 L19 13 Q19 12 20 12 L28 12 Q32 12 32 15.5 L32 18 Z" fill="currentColor"/>
+      <!-- Cab window -->
+      <rect x="20.5" y="13" width="9" height="4" rx="1.5" fill="white" opacity="0.45"/>
+      <!-- Wheels -->
+      <circle cx="13" cy="29" r="3.5" fill="var(--color-bg,#f7f6f2)" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="28" cy="29" r="3.5" fill="var(--color-bg,#f7f6f2)" stroke="currentColor" stroke-width="1.8"/>
+      <!-- Medical cross -->
+      <rect x="8.5" y="20.5" width="7" height="2.2" rx="1.1" fill="white" opacity="0.65"/>
+      <rect x="11.4" y="17.8" width="2.2" height="7.5" rx="1.1" fill="white" opacity="0.65"/>
+    </svg>
+    <div>
+      <div class="logo-name">Flota PWA</div>
+      <div class="logo-sub">Panel kuriera</div>
     </div>
   </div>
 
-<script type="module">
-  import { resolveSession } from './js/auth.js';
+  <!-- Stan: ładowanie / weryfikacja -->
+  <div class="spinner-wrap" id="stateLoading" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <span class="spinner-label">Weryfikacja dostępu…</span>
+  </div>
 
-  // Rejestracja Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .catch(e => console.warn('[SW]', e));
-  }
+  <!-- Stan: błąd (brak tokenu) -->
+  <div class="error-wrap" id="stateError" role="alert" aria-live="assertive">
+    <div class="error-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <circle cx="12" cy="16" r="0.5" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <p class="error-title">Brak dostępu</p>
+    <p class="error-msg">Nie udało się zweryfikować Twojego dostępu do aplikacji.</p>
+    <p class="error-note">Skontaktuj się z administratorem,<br>aby otrzymać nowy kod QR.</p>
+  </div>
 
-  (async () => {
-    const session = await resolveSession();
+</div>
 
-    if (session && session.token) {
-      document.getElementById('status-msg').textContent = 'Wczytuję aplikację…';
-      // Przekieruj do głównej aplikacji zachowując token w URL
-      // (app.html sama odczyta token z IndexedDB)
-      window.location.replace('./app.html');
-    } else {
-      document.getElementById('status-msg').textContent = 'Brak dostępu';
-      document.getElementById('error-box').classList.add('show');
+<script>
+  /* ── Theme toggle ── */
+  (function () {
+    const btn  = document.querySelector('[data-theme-toggle]');
+    const html = document.documentElement;
+    const mq   = matchMedia('(prefers-color-scheme:dark)');
+    let theme  = mq.matches ? 'dark' : 'light';
+    html.setAttribute('data-theme', theme);
+    const moonSVG = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    const sunSVG  = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    if (btn) btn.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', theme);
+      btn.innerHTML = theme === 'dark' ? sunSVG : moonSVG;
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Włącz jasny motyw' : 'Włącz ciemny motyw');
+    });
+  })();
+
+  /* ── Auth logic ── */
+  (function () {
+    const SESSION_KEY = 'flota_token';
+    const APP_PAGE    = 'app.html';       // ← docelowy plik głównej aplikacji
+
+    function showError() {
+      document.getElementById('stateLoading').style.display = 'none';
+      document.getElementById('stateError').style.display   = 'flex';
     }
+
+    function go(token) {
+      try { sessionStorage.setItem(SESSION_KEY, token); } catch (e) { /* sandboxed – ignoruj */ }
+      // Przekierowanie — token przeniesiony przez sessionStorage; w URL tylko jako fallback
+      window.location.replace(APP_PAGE + '?t=' + encodeURIComponent(token));
+    }
+
+    /* 1 — token w URL (?t=...) — typowe wejście przez QR */
+    const urlToken = new URLSearchParams(window.location.search).get('t');
+    if (urlToken && urlToken.trim() !== '') {
+      go(urlToken.trim());
+      return;
+    }
+
+    /* 2 — brak tokenu w URL, ale jest w sessionStorage (np. odświeżenie F5) */
+    let storedToken = null;
+    try { storedToken = sessionStorage.getItem(SESSION_KEY); } catch (e) {}
+    if (storedToken && storedToken.trim() !== '') {
+      go(storedToken.trim());
+      return;
+    }
+
+    /* 3 — brak tokenu w obu miejscach → blokada */
+    setTimeout(showError, 550);
   })();
 </script>
+
 </body>
 </html>
